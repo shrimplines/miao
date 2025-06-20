@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://dq0gq67qldcfp"]
+
+[ext_resource type="Script" uid="uid://dbquiwg1xk646" path="res://opening_screen.gd" id="1_sa2xx"]
+
+[node name="A Gnormal Journey" type="Node2D"]
+
+[node name="Opening Screen" type="Node2D" parent="."]
+script = ExtResource("1_sa2xx")
+
+[node name="Sprite2D" type="Sprite2D" parent="Opening Screen"]
