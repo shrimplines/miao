@@ -1,10 +1,175 @@
-[gd_scene load_steps=2 format=3 uid="uid://dq0gq67qldcfp"]
+[gd_scene load_steps=17 format=3 uid="uid://dq0gq67qldcfp"]
 
 [ext_resource type="Script" uid="uid://dbquiwg1xk646" path="res://opening_screen.gd" id="1_sa2xx"]
+[ext_resource type="Texture2D" uid="uid://elp7l3s2fsrw" path="res://Graphics/Backgrounds/Opening Screen Background.png" id="2_u351b"]
+[ext_resource type="Texture2D" uid="uid://y12jc25dnfi3" path="res://Graphics/Characters/NPC Gnorm/Stand/L-Stand1 - NPC Normal.png" id="3_7fntj"]
+[ext_resource type="Texture2D" uid="uid://bakmqus2anqof" path="res://Graphics/Characters/NPC Gnorm/Stand/L-Stand2 - NPC Normal.png" id="4_oxqou"]
+[ext_resource type="Script" uid="uid://dv2ku4oenu7jv" path="res://fl_standing_normal_npc.gd" id="5_kk2nm"]
+[ext_resource type="Texture2D" uid="uid://bm5tc82a7f1eh" path="res://Graphics/Characters/NPC Gnorm/Stand/R-Stand2 - NPC Normal.png" id="5_my11r"]
+[ext_resource type="Texture2D" uid="uid://d0qp7icul8k1d" path="res://Graphics/Characters/NPC Gnorm/Stand/R-Stand1-NPC Normal.png" id="6_kk2nm"]
+[ext_resource type="Script" uid="uid://dpyegahohtw2m" path="res://fr_standing_normal_npc.gd" id="8_mbh3j"]
+[ext_resource type="PackedScene" uid="uid://bikvftcfu5luk" path="res://fl_walking_normal_npc.tscn" id="9_rt0vr"]
+[ext_resource type="PackedScene" uid="uid://riu8n3hbuf6b" path="res://fr_walking_normal_npc.tscn" id="10_oxqou"]
+[ext_resource type="Script" uid="uid://p33qeeb31sba" path="res://fr_walking_normal_npc.gd" id="11_my11r"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_1ejyt"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_7fntj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_oxqou")
+}],
+"loop": true,
+"name": &"default",
+"speed": 1.5
+}]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_og4cw"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_my11r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_kk2nm")
+}],
+"loop": true,
+"name": &"default",
+"speed": 1.5
+}]
+
+[sub_resource type="Curve2D" id="Curve2D_of3ce"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 428.572, 914.285, 353.213, 606.459, -353.213, -606.459, 0.000976563, -457.143, 689.098, 359.211, -689.098, -359.211, -2400, -1371.43, 43.985, 828.384, -43.985, -828.384, -3428.57, -3200, 139.346, 424.098, -139.346, -424.098, -3657.14, -5257.14, 345.337, 642.205, -345.337, -642.205, -4457.14, -6628.57, 0, 0, 0, 0, -4685.71, -9028.57)
+}
+point_count = 7
+
+[sub_resource type="GDScript" id="GDScript_rt0vr"]
+script/source = "extends AnimatedSprite2D
+
+@export var speed: float = 650
+@export var sprite_scene: PackedScene
+@export var follow_path: NodePath
+
+@onready var path_follow = get_parent() as PathFollow2D
+
+var travel_time := 0.0
+var parent_rotation
+
+func _ready():
+	play()
+	show()
+	path_follow.loop = true
+	set_process(true)
+
+	# Original starts moving right away.
+	start_spawn_sequence()
+
+func _process(delta):
+	travel_time += delta
+	path_follow.progress += speed * delta
+	parent_rotation = get_parent().rotation
+	rotation = -parent_rotation
+
+# Orchestrates everything in order
+func start_spawn_sequence():
+	await get_tree().create_timer(2.0).timeout  # Wait before clones start
+
+	spawn_wave(2, 2.0)  # First wave: 3 clones, 2 sec apart
+
+	# Wait for the first wave (2.0 * 2) + 6 seconds before second wave
+	await get_tree().create_timer(2.0 * 2 + 6).timeout
+	spawn_wave(2, 2.5)  # Second wave: 2 clones, 2.5 sec apart
+
+func spawn_wave(count: int, delay: float):
+	for i in range(count):
+		await get_tree().create_timer(delay * i).timeout
+		spawn_clone()
+
+func spawn_clone():
+	if sprite_scene == null:
+		push_error(\"sprite_scene is not assigned! Assign it in the Inspector.\")
+		return
+
+	# print(\"⏳\")
+
+	var new_follow = PathFollow2D.new()
+	var new_sprite = sprite_scene.instantiate() as AnimatedSprite2D
+
+	new_follow.loop = true
+	new_follow.progress = 0.0
+	new_follow.name = \"CloneFollow\"
+	new_follow.add_child(new_sprite)
+
+	var path = get_node_or_null(follow_path)
+	if path and path is Path2D:
+		path.add_child(new_follow)  # ✅ Add to the actual path, not to this node
+		# print(\"✅\")
+	else:
+		push_error(\"Could not find Path2D at: %s\" % follow_path)
+
+func hide_original():
+	hide()  # Optional: call this if you want to hide the original sprite
+"
+
+[sub_resource type="Curve2D" id="Curve2D_ev6kd"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 696, -48, -8.87917, -46.4449, 8.87917, 46.4449, 720, 56, -70, -13.6364, 70, 13.6364, 840, 264, -42.7273, -51.8182, 42.7273, 51.8182, 912, 424, 0, 0, 0, 0, 1008, 456)
+}
+point_count = 5
 
 [node name="A Gnormal Journey" type="Node2D"]
 
 [node name="Opening Screen" type="Node2D" parent="."]
 script = ExtResource("1_sa2xx")
 
-[node name="Sprite2D" type="Sprite2D" parent="Opening Screen"]
+[node name="Background" type="Sprite2D" parent="Opening Screen"]
+position = Vector2(576, 324)
+texture = ExtResource("2_u351b")
+
+[node name="Sprites" type="Node" parent="Opening Screen/Background"]
+
+[node name="FL-Standing-Normal-NPC" type="AnimatedSprite2D" parent="Opening Screen/Background/Sprites"]
+position = Vector2(584, 328)
+scale = Vector2(0.07, 0.07)
+sprite_frames = SubResource("SpriteFrames_1ejyt")
+frame_progress = 0.0272909
+script = ExtResource("5_kk2nm")
+
+[node name="FR-Standing-Normal-NPC" type="AnimatedSprite2D" parent="Opening Screen/Background/Sprites"]
+position = Vector2(517, 328)
+scale = Vector2(0.07, 0.07)
+sprite_frames = SubResource("SpriteFrames_og4cw")
+frame_progress = 0.673863
+script = ExtResource("8_mbh3j")
+
+[node name="FL-Walking-Normal-NPC" type="Path2D" parent="Opening Screen/Background/Sprites"]
+position = Vector2(610, 616)
+scale = Vector2(0.07, 0.07)
+curve = SubResource("Curve2D_of3ce")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Opening Screen/Background/Sprites/FL-Walking-Normal-NPC"]
+position = Vector2(428.572, 914.285)
+rotation = -1.66146
+rotates = false
+
+[node name="FL-Walking-Normal-NPC" parent="Opening Screen/Background/Sprites/FL-Walking-Normal-NPC/PathFollow2D" instance=ExtResource("9_rt0vr")]
+position = Vector2(15.5215, -12.9351)
+script = SubResource("GDScript_rt0vr")
+sprite_scene = ExtResource("9_rt0vr")
+follow_path = NodePath("../..")
+
+[node name="FR-Walking-Normal-NPC" type="Path2D" parent="Opening Screen/Background/Sprites"]
+curve = SubResource("Curve2D_ev6kd")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Opening Screen/Background/Sprites/FR-Walking-Normal-NPC"]
+position = Vector2(1008, 456)
+rotation = 1.09425
+progress = 726.171
+rotates = false
+
+[node name="FR-Walking-Normal-NPC" parent="Opening Screen/Background/Sprites/FR-Walking-Normal-NPC/PathFollow2D" instance=ExtResource("10_oxqou")]
+position = Vector2(-8, -3.05176e-05)
+script = ExtResource("11_my11r")
