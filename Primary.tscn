@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dq0gq67qldcfp"]
+[gd_scene load_steps=18 format=3 uid="uid://dq0gq67qldcfp"]
 
 [ext_resource type="Script" uid="uid://dbquiwg1xk646" path="res://opening_screen.gd" id="1_sa2xx"]
 [ext_resource type="Texture2D" uid="uid://elp7l3s2fsrw" path="res://Graphics/Backgrounds/Opening Screen Background.png" id="2_u351b"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://d0qp7icul8k1d" path="res://Graphics/Characters/NPC Gnorm/Stand/R-Stand1-NPC Normal.png" id="6_kk2nm"]
 [ext_resource type="Script" uid="uid://dpyegahohtw2m" path="res://fr_standing_normal_npc.gd" id="8_mbh3j"]
 [ext_resource type="PackedScene" uid="uid://bikvftcfu5luk" path="res://fl_walking_normal_npc.tscn" id="9_rt0vr"]
+[ext_resource type="Script" uid="uid://bgo65bt21ssd5" path="res://clone_movement.gd" id="10_my11r"]
 [ext_resource type="PackedScene" uid="uid://riu8n3hbuf6b" path="res://fr_walking_normal_npc.tscn" id="10_oxqou"]
 [ext_resource type="Script" uid="uid://p33qeeb31sba" path="res://fr_walking_normal_npc.gd" id="11_my11r"]
 
@@ -169,6 +170,7 @@ position = Vector2(1008, 456)
 rotation = 1.09425
 progress = 726.171
 rotates = false
+script = ExtResource("10_my11r")
 
 [node name="FR-Walking-Normal-NPC" parent="Opening Screen/Background/Sprites/FR-Walking-Normal-NPC/PathFollow2D" instance=ExtResource("10_oxqou")]
 position = Vector2(-8, -3.05176e-05)

@@ -63,3 +63,4 @@ func spawn_clone():
 
 func hide_original():
 	hide()  # Optional: call this if you want to hide the original sprite
+
